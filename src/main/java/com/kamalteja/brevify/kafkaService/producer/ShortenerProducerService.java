@@ -12,10 +12,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Slf4j
 public class ShortenerProducerService {
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
     private static final String TOPIC = "short-url-topic";
-
+    private final ObjectMapper objectMapper = new ObjectMapper();
     private final KafkaTemplate<String, String> kafkaTemplate;
 
     public void sendMessage(CodeUrlMapping codeUrlMapping) {

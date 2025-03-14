@@ -15,8 +15,8 @@ public class CodeUrlMappingDAOImpl implements ICodeUrlMappingDAO {
     }
 
     @Override
-    public CodeUrlMapping save(CodeUrlMapping codeUrlMapping) {
-        return codeUrlMappingRepository.save(codeUrlMapping);
+    public void save(CodeUrlMapping codeUrlMapping) {
+        codeUrlMappingRepository.save(codeUrlMapping);
     }
 
     @Override

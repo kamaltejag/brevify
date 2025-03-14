@@ -1,5 +1,8 @@
 package com.kamalteja.brevify.shortenerService.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum CodeStatusEnum {
     ACTIVE("active"),
     INACTIVE("inactive"),
@@ -9,9 +12,5 @@ public enum CodeStatusEnum {
 
     CodeStatusEnum(String status) {
         this.status = status;
-    }
-
-    public String getStatus() {
-        return status;
     }
 }

@@ -36,20 +36,20 @@ public class CodeUrlMapping {
     @Column(nullable = false)
     private String status;
 
-    @JsonIgnore
-    public boolean isCodeActive() {
-        return StringUtils.pathEquals(CodeStatusEnum.ACTIVE.getStatus(), this.status);
-    }
-
-    @JsonIgnore
-    public boolean isCodeExpired() {
-        return expiresAt.before(Timestamp.from(Instant.now()));
-    }
-    
     public CodeUrlMapping(CodeUrlMappingDTO codeUrlMappingDTO) {
         this.longUrl = codeUrlMappingDTO.getLongUrl();
         this.shortCode = codeUrlMappingDTO.getShortCode();
         this.expiresAt = codeUrlMappingDTO.getExpiresAt();
         this.status = codeUrlMappingDTO.getStatus();
+    }
+
+    @JsonIgnore
+    public boolean isCodeActive() {
+        return StringUtils.pathEquals(CodeStatusEnum.ACTIVE.getStatus(), this.status);
+    }
+    
+    @JsonIgnore
+    public boolean isCodeExpired() {
+        return expiresAt.before(Timestamp.from(Instant.now()));
     }
 }
