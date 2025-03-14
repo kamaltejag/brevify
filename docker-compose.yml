@@ -1,0 +1,55 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgresDB
+    restart: always
+    environment:
+      POSTGRES_USER: kamal
+      POSTGRES_PASSWORD: N3@K2gVoHb76
+      POSTGRES_DB: brevify
+    ports:
+      - "5433:5432"
+    volumes:
+      - C:\docker-data\postgres:/var/lib/postgresql/data
+    networks:
+      - brevify_network
+
+  zookeeper:
+    image: bitnami/zookeeper:latest
+    container_name: zookeeper
+    restart: always
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    ports:
+      - "2181:2181"
+    networks:
+      - brevify_network
+
+  kafka:
+    image: bitnami/kafka:latest
+    container_name: kafka
+    restart: always
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://host.docker.internal:9092
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT
+      - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    volumes:
+      - kafka_data:/bitnami/kafka
+    networks:
+      - brevify_network
+
+volumes:
+  pgdata:
+  kafka_data:
+
+networks:
+  brevify_network:
+    driver: bridge

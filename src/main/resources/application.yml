@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: brevify
+  profiles:
+    active: local
+
+# SPRING_PROFILES_ACTIVE=prod mvn spring-boot:run - For running different Profiles

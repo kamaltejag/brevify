@@ -1,0 +1,3 @@
+-- Create a dummy user
+--INSERT INTO users (id, username, email, password, created_at, updated_at)
+--VALUES (gen_random_uuid(), 'kamal', 'kamal@brevify.com', 'kamal@brevify', NOW(), NOW());
