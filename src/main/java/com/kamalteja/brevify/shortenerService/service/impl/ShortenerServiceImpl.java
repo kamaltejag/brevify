@@ -1,5 +1,9 @@
 package com.kamalteja.brevify.shortenerService.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kamalteja.brevify.cacheService.ShortenerCacheService;
+import com.kamalteja.brevify.kafkaService.exception.MessagePublishingException;
 import com.kamalteja.brevify.kafkaService.producer.ShortenerProducerService;
 import com.kamalteja.brevify.shortenerService.config.ApplicationProperties;
 import com.kamalteja.brevify.shortenerService.dao.ICodeUrlMappingDAO;
@@ -32,14 +36,18 @@ public class ShortenerServiceImpl implements IShortenerService {
     private final ApplicationProperties applicationProperties;
     private final ICodeUrlMappingDAO codeUrlMappingDAO;
     private final ShortenerProducerService shortenerProducerService;
+    private final ShortenerCacheService shortenerCacheService;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public ShortenerServiceImpl(ShortenerUtility shortenerUtility,
                                 ApplicationProperties applicationProperties, ICodeUrlMappingDAO codeUrlMappingDAO,
-                                ShortenerProducerService shortenerProducerService) {
+                                ShortenerProducerService shortenerProducerService, ShortenerCacheService shortenerCacheService) {
         this.shortenerUtility = shortenerUtility;
         this.applicationProperties = applicationProperties;
         this.codeUrlMappingDAO = codeUrlMappingDAO;
         this.shortenerProducerService = shortenerProducerService;
+        this.shortenerCacheService = shortenerCacheService;
     }
 
     @Override
@@ -57,10 +65,16 @@ public class ShortenerServiceImpl implements IShortenerService {
                     .expiresAt(Timestamp.valueOf(LocalDateTime.now().plusDays(90)))
                     .status(CodeStatusEnum.ACTIVE.getStatus())
                     .build();
-            shortenerProducerService.sendMessage(codeUrlMapping);
-            Map<String, String> response = new HashMap<>();
-            response.put(SHORT_URL, shortUrl);
-            return response;
+            try {
+                String message = objectMapper.writeValueAsString(codeUrlMapping);
+                shortenerProducerService.sendMessage(shortCode, message);
+                shortenerCacheService.cacheShortUrl(shortCode, shortenRequestDTO.url());
+                Map<String, String> response = new HashMap<>();
+                response.put(SHORT_URL, shortUrl);
+                return response;
+            } catch (JsonProcessingException e) {
+                throw new MessagePublishingException();
+            }
         }
     }
 
@@ -77,17 +91,26 @@ public class ShortenerServiceImpl implements IShortenerService {
     @Override
     public String fetchLongUrlByShortCode(String shortCode) {
         log.info("in ShortenerServiceImpl -> fetchLongUrlByShortCode - {}", shortCode);
-        CodeUrlMapping codeUrlMapping = codeUrlMappingDAO.findByShortCode(shortCode);
-        if (codeUrlMapping == null || !StringUtils.hasText(codeUrlMapping.getLongUrl())) {
-            log.error("Issue with the code mapping");
-            throw new CodeNotFoundException();
-        } else if (!codeUrlMapping.isCodeActive()) {
-            log.error("Short url is not yet active");
-            throw new CodeInactiveException();
-        } else if (codeUrlMapping.isCodeExpired()) {
-            log.error("Short url has expired");
-            throw new CodeExpiredException();
+
+        String longUrl = shortenerCacheService.getCachedLongUrl(shortCode);
+        if (StringUtils.hasText(longUrl)) {
+            return longUrl;
+        } else {
+            CodeUrlMapping codeUrlMapping = codeUrlMappingDAO.findByShortCode(shortCode);
+            if (codeUrlMapping == null || !StringUtils.hasText(codeUrlMapping.getLongUrl())) {
+                log.error("Issue with the code mapping");
+                throw new CodeNotFoundException();
+            } else if (!codeUrlMapping.isCodeActive()) {
+                log.error("Short url is not yet active");
+                throw new CodeInactiveException();
+            } else if (codeUrlMapping.isCodeExpired()) {
+                log.error("Short url has expired");
+                throw new CodeExpiredException();
+            }
+            if (!StringUtils.hasText(codeUrlMapping.getLongUrl())) {
+                shortenerCacheService.cacheShortUrl(shortCode, longUrl);
+            }
+            return codeUrlMapping.getLongUrl();
         }
-        return codeUrlMapping.getLongUrl();
     }
 }

@@ -10,7 +10,7 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      - C:\docker-data\postgres:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - brevify_network
 
@@ -46,9 +46,22 @@ services:
     networks:
       - brevify_network
 
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - brevify_network
+    command: [ "redis-server", "--appendonly", "yes" ]
+
 volumes:
-  pgdata:
+  postgres_data:
   kafka_data:
+  redis_data:
 
 networks:
   brevify_network:

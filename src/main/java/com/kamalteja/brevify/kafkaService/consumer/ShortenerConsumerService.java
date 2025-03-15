@@ -2,12 +2,15 @@ package com.kamalteja.brevify.kafkaService.consumer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kamalteja.brevify.kafkaService.exception.MessageConsumingException;
 import com.kamalteja.brevify.shortenerService.dao.ICodeUrlMappingDAO;
 import com.kamalteja.brevify.shortenerService.model.CodeUrlMapping;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @Slf4j
@@ -19,13 +22,13 @@ public class ShortenerConsumerService {
     private final ICodeUrlMappingDAO codeUrlMappingDAO;
 
     @KafkaListener(topics = "short-url-topic", groupId = "brevify-group")
-    public void consume(String message) {
+    public void saveCodeUrlMapping(String message) {
         try {
             CodeUrlMapping codeUrlMapping = objectMapper.readValue(message, CodeUrlMapping.class);
             log.info("Consumed message for: {}", codeUrlMapping.getLongUrl());
             codeUrlMappingDAO.save(codeUrlMapping);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new MessageConsumingException(List.of("short-url-topic"));
         }
     }
 }
