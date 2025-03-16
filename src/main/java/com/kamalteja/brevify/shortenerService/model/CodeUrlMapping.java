@@ -47,7 +47,7 @@ public class CodeUrlMapping {
     public boolean isCodeActive() {
         return StringUtils.pathEquals(CodeStatusEnum.ACTIVE.getStatus(), this.status);
     }
-    
+
     @JsonIgnore
     public boolean isCodeExpired() {
         return expiresAt.before(Timestamp.from(Instant.now()));

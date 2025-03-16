@@ -11,8 +11,8 @@ import java.util.concurrent.TimeUnit;
 @Service
 @RequiredArgsConstructor
 public class ShortenerCacheService {
-    private final StringRedisTemplate redisTemplate;
     private static final long EXPIRATION_TIME = 24; // Cache expiry in hours
+    private final StringRedisTemplate redisTemplate;
 
     public void cacheShortUrl(String shortCode, String longUrl) {
         redisTemplate.opsForValue().set(shortCode, longUrl, EXPIRATION_TIME, TimeUnit.HOURS);
