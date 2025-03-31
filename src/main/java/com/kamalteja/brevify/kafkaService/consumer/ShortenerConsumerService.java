@@ -21,6 +21,13 @@ public class ShortenerConsumerService {
 
     private final ICodeUrlMappingDAO codeUrlMappingDAO;
 
+    /**
+     * Kafka listener method that consumes messages from the "short-url-topic" topic.
+     * Deserializes the message into a CodeUrlMapping object and saves it to the database.
+     *
+     * @param message The JSON string message received from Kafka
+     * @throws MessageConsumingException If there is an error processing the JSON message
+     */
     @KafkaListener(topics = "short-url-topic", groupId = "brevify-group")
     public void saveCodeUrlMapping(String message) {
         try {

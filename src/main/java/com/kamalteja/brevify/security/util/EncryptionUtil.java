@@ -1,4 +1,4 @@
-package com.kamalteja.brevify.shortenerService.util;
+package com.kamalteja.brevify.security.util;
 
 import org.springframework.stereotype.Component;
 
@@ -10,6 +10,14 @@ import java.security.NoSuchAlgorithmException;
 public class EncryptionUtil {
     private static final String BASE62_ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
+    /**
+     * Generates a unique hash for a URL by combining it with a timestamp.
+     * The method creates a SHA-256 hash, converts it to a long number,
+     * and then encodes it to a Base62 string.
+     *
+     * @param longUrl The original URL to be hashed
+     * @return A Base62 encoded string representing the hashed URL
+     */
     public String hashUrl(String longUrl) {
         // Todo: Change logic to use User Id instead of current timestamp
         long timestamp = System.currentTimeMillis();

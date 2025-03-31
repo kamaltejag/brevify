@@ -3,25 +3,24 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 ---- Users Table
---CREATE TABLE users (
---    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
---    username VARCHAR(100) NOT NULL,
---    email VARCHAR(100) UNIQUE NOT NULL,
---    password VARCHAR(100) NOT NULL,
---    created_at TIMESTAMP DEFAULT NOW(),
---    updated_at TIMESTAMP DEFAULT NOW()
---);
+CREATE TABLE users (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    username VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
 
 CREATE TABLE code_url_mapping (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     long_url TEXT NOT NULL,
     short_code VARCHAR(20) UNIQUE NOT NULL,
---    userId UUID NOT NULL,
+    user_id UUID NOT NULL,
     expires_at TIMESTAMP NOT NULL,
     status VARCHAR(20) NOT NULL,
     created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
---    FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
+    updated_at TIMESTAMP DEFAULT NOW(),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE url_clicks (

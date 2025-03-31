@@ -1,7 +1,6 @@
 package com.kamalteja.brevify.shortenerService.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.kamalteja.brevify.shortenerService.dto.CodeUrlMappingDTO;
 import com.kamalteja.brevify.shortenerService.enums.CodeStatusEnum;
 import jakarta.persistence.*;
 import lombok.*;
@@ -31,17 +30,13 @@ public class CodeUrlMapping {
     private String shortCode;
 
     @Column(nullable = false)
+    private UUID userId;
+
+    @Column(nullable = false)
     private Timestamp expiresAt;
 
     @Column(nullable = false)
     private String status;
-
-    public CodeUrlMapping(CodeUrlMappingDTO codeUrlMappingDTO) {
-        this.longUrl = codeUrlMappingDTO.getLongUrl();
-        this.shortCode = codeUrlMappingDTO.getShortCode();
-        this.expiresAt = codeUrlMappingDTO.getExpiresAt();
-        this.status = codeUrlMappingDTO.getStatus();
-    }
 
     @JsonIgnore
     public boolean isCodeActive() {

@@ -7,7 +7,6 @@ import com.kamalteja.brevify.shortenerService.dto.ShortenRequestDTO;
 import com.kamalteja.brevify.shortenerService.service.IShortenerService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +23,6 @@ public class ShortenerController {
 
     private final IShortenerService shortenerService;
 
-    @Autowired
     public ShortenerController(IShortenerService shortenerService) {
         this.shortenerService = shortenerService;
     }

@@ -1,5 +1,6 @@
 package com.kamalteja.brevify.shortenerService.util;
 
+import com.kamalteja.brevify.security.util.EncryptionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

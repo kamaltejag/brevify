@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kamalteja.brevify.cacheService.ShortenerCacheService;
 import com.kamalteja.brevify.kafkaService.exception.MessagePublishingException;
 import com.kamalteja.brevify.kafkaService.producer.ShortenerProducerService;
+import com.kamalteja.brevify.security.util.JwtUtil;
 import com.kamalteja.brevify.shortenerService.config.ApplicationProperties;
 import com.kamalteja.brevify.shortenerService.dao.ICodeUrlMappingDAO;
 import com.kamalteja.brevify.shortenerService.dto.CodeUrlMappingDTO;
@@ -17,6 +18,10 @@ import com.kamalteja.brevify.shortenerService.exception.ShortUrlCreationFailedEx
 import com.kamalteja.brevify.shortenerService.model.CodeUrlMapping;
 import com.kamalteja.brevify.shortenerService.service.IShortenerService;
 import com.kamalteja.brevify.shortenerService.util.ShortenerUtility;
+import com.kamalteja.brevify.user.exception.AuthenticationFailedException;
+import com.kamalteja.brevify.user.exception.UserNotFoundException;
+import com.kamalteja.brevify.user.model.User;
+import com.kamalteja.brevify.user.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -37,17 +42,22 @@ public class ShortenerServiceImpl implements IShortenerService {
     private final ICodeUrlMappingDAO codeUrlMappingDAO;
     private final ShortenerProducerService shortenerProducerService;
     private final ShortenerCacheService shortenerCacheService;
+    private final UserService userService;
+    private final JwtUtil jwtUtil;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public ShortenerServiceImpl(ShortenerUtility shortenerUtility,
                                 ApplicationProperties applicationProperties, ICodeUrlMappingDAO codeUrlMappingDAO,
-                                ShortenerProducerService shortenerProducerService, ShortenerCacheService shortenerCacheService) {
+                                ShortenerProducerService shortenerProducerService, ShortenerCacheService shortenerCacheService,
+                                UserService userService, JwtUtil jwtUtil) {
         this.shortenerUtility = shortenerUtility;
         this.applicationProperties = applicationProperties;
         this.codeUrlMappingDAO = codeUrlMappingDAO;
         this.shortenerProducerService = shortenerProducerService;
         this.shortenerCacheService = shortenerCacheService;
+        this.userService = userService;
+        this.jwtUtil = jwtUtil;
     }
 
     /**
@@ -59,12 +69,24 @@ public class ShortenerServiceImpl implements IShortenerService {
      * @return a map with the key "shortUrl" and the value as the generated short URL
      * @throws ShortUrlCreationFailedException if the base URL or short code is empty
      * @throws MessagePublishingException      if there is an error during message publishing
+     * @throws AuthenticationFailedException   if the username is empty
+     * @throws UserNotFoundException           if the user is not found
      */
     @Override
     public Map<String, String> shortenUrl(ShortenRequestDTO shortenRequestDTO) {
         log.info("in ShortenerServiceImpl -> shortenUrl - {}", shortenRequestDTO.url());
         String shortCode = shortenerUtility.shortenUrl(shortenRequestDTO.url());
-        if (!StringUtils.hasText(applicationProperties.baseUrl()) && !StringUtils.hasText(shortCode)) {
+        String username = jwtUtil.getLoggedInUsername();
+        if (!StringUtils.hasText(username)) {
+            log.error("username is empty");
+            throw new AuthenticationFailedException();
+        }
+
+        User user = userService.getUserByUsername(username);
+        if (user == null) {
+            log.error("User not Found");
+            throw new UserNotFoundException();
+        } else if (!StringUtils.hasText(applicationProperties.baseUrl()) && !StringUtils.hasText(shortCode)) {
             log.error("baseUrl or shortCode is empty");
             throw new ShortUrlCreationFailedException();
         } else {
@@ -74,19 +96,14 @@ public class ShortenerServiceImpl implements IShortenerService {
                     .shortCode(shortCode)
                     .expiresAt(Timestamp.valueOf(LocalDateTime.now().plusDays(90)))
                     .status(CodeStatusEnum.ACTIVE.getStatus())
+                    .userId(user.getId())
                     .build();
             try {
                 String message = objectMapper.writeValueAsString(codeUrlMapping);
                 shortenerProducerService.sendMessage(shortCode, message);
                 shortenerCacheService.cacheShortUrl(shortCode, shortenRequestDTO.url());
                 return Collections.singletonMap(SHORT_URL, shortUrl);
-/**
- * Implementation of the IShortenerService interface, providing methods to shorten URLs,
- * retrieve short code data, and fetch long URLs by short code. This service utilizes
- * utility classes for URL shortening, caches short URLs, and communicates with a Kafka
- * producer for message publishing. It handles exceptions related to URL creation, message
- * publishing, and short code validation.
- */} catch (JsonProcessingException e) {
+            } catch (JsonProcessingException e) {
                 throw new MessagePublishingException();
             }
         }
