@@ -7,7 +7,7 @@
 	},
 	"item": [
 		{
-			"name": "localhost:8080/shorten",
+			"name": "Register",
 			"request": {
 				"auth": {
 					"type": "noauth"
@@ -16,7 +16,45 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"url\": \"https://github.com/kamaltejag\"\r\n}",
+					"raw": "{\r\n    \"username\": \"test\",\r\n    \"password\": \"test1234\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/auth/register",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"auth",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Shorten",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InRlc3QiLCJzdWIiOiJ0ZXN0IiwiaWF0IjoxNzQzNDIyMTE0LCJleHAiOjE3NDM0MjU3MTR9.hZ4KefitUQjPDOBmMSXYvnSrMknmuizedHmX2LySUqg",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"url\": \"https://github.com/kamaltejag\"\r\n}   ",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -37,37 +75,51 @@
 			"response": []
 		},
 		{
-			"name": "localhost:8080/{shortCode}",
+			"name": "Open Shortcode",
 			"request": {
 				"auth": {
-					"type": "noauth"
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InRlc3QiLCJzdWIiOiJ0ZXN0IiwiaWF0IjoxNzQzNDIyMTE0LCJleHAiOjE3NDM0MjU3MTR9.hZ4KefitUQjPDOBmMSXYvnSrMknmuizedHmX2LySUqg",
+							"type": "string"
+						}
+					]
 				},
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/8LJKjTIh1l0",
+					"raw": "http://localhost:8080/2KRbiPw6Jzc",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"port": "8080",
 					"path": [
-						"8LJKjTIh1l0"
+						"2KRbiPw6Jzc"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "localhost:8080/code/{shortCode}",
+			"name": "ShortCode Details",
 			"request": {
 				"auth": {
-					"type": "noauth"
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InRlc3QxIiwic3ViIjoidGVzdDEiLCJpYXQiOjE3NDM0MDg1MTgsImV4cCI6MTc0NzAwODUxOH0.9sdEvSijQVjeE67PWn4ildGqa9_TY5DXG1bF-qXe22o",
+							"type": "string"
+						}
+					]
 				},
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/code/8LJKjTIh1l0",
+					"raw": "http://localhost:8080/code/2KRbiPw6Jzc",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -75,7 +127,38 @@
 					"port": "8080",
 					"path": [
 						"code",
-						"8LJKjTIh1l0"
+						"2KRbiPw6Jzc"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"test1\",\r\n    \"password\": \"test1234\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/auth/login",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"auth",
+						"login"
 					]
 				}
 			},
